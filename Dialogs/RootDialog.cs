@@ -89,31 +89,28 @@ namespace whoWasIn.Dialogs
 
             switch (response.topScoringIntent.intent)
             {
-
-
                 case "Who worked on":
-                    ctx.Call<object>(new RootDialog(), null);
+                    ctx.Call<object>(new WhoWorkedOnDialog(response), null);
                     break;
                 case "GetYear":
-                    ctx.Call<object>(new RootDialog(), null);
+                    ctx.Call<object>(new WhatYearDialog(), null);
                     break;
                 case "Tell me about":
-                    ctx.Call<object>(new RootDialog(), null);
+                    ctx.Call<object>(new TellMeAbout(response), null);
                     break;
                 default:
                     break;
             }
 
-            await ctx.PostAsync("They both acted in");
+            //await ctx.PostAsync("They both acted in");
 
+            //MovieService movieService = await MovieService.GetInstanceAsync();
 
-            MovieService movieService = await MovieService.GetInstanceAsync();
-
-            var x = await movieService.SearchMultiAsync("Hitchcock");
+            //var x = await movieService.SearchMultiAsync("Hitchcock");
 
             //var x = await movieService.DiscoverMoviesWithPeopleAsync("Brad Pitt");
 
-            await ctx.PostAsync(string.Format("I found {0} matches.", x.Movies.Count()));
+            //await ctx.PostAsync(string.Format("I found {0} matches.", x.Movies.Count()));
 
             //foreach (var item in x)
             //{
@@ -133,6 +130,16 @@ namespace whoWasIn.Dialogs
             //}
 
             ctx.Wait(MessageReceivedAsync);
+        }
+
+        private async Task ResumeAfterWhoWorkedOnDialog(IDialogContext context, IAwaitable<int> result)
+        {
+         }
+        private async Task ResumeAfterWhatYearDialog(IDialogContext context, IAwaitable<int> result)
+        {
+        }
+        private async Task ResumeAfterTellMeAbout(IDialogContext context, IAwaitable<int> result)
+        {
         }
     }
 }

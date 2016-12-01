@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using whoWasIn.Services.LUISService;
 
 namespace whoWasIn.Dialogs {
     
@@ -66,7 +67,7 @@ namespace whoWasIn.Dialogs {
             var message = await argument;
 
             await ctx.PostAsync("You said " + message.Text + " but you meant to ask something else");
-            await ctx.PostAsync("They both acted in");
+            /*await ctx.PostAsync("They both acted in");
             Dictionary<string, List<string>> query = new Dictionary<string, List<string>>()
             {
                 {  "cast", new List<string>() { "al pacino", "robert de niro" } }
@@ -77,7 +78,9 @@ namespace whoWasIn.Dialogs {
             JToken results = movies.First.Next.First;
             foreach (var movie in results.Children()) {
                 await ctx.PostAsync(movie["title"].ToString());
-            }
+            }*/
+
+            LUISResponse response = await LUISService.askLUIS(message.Text);
 
             ctx.Wait(MessageReceivedAsync);
         }

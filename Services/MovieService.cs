@@ -103,6 +103,7 @@
                         {
                             id = (int)r["id"],
                             overview = (string)r["overview"],
+                            id = (int)r["id"],
                             overview_short = ((string)r["overview"]).Length > 100 ? ((string)r["overview"]).Substring(0, 100) + "..." : (string)r["overview"],
                             release_date = (string)r["release_date"],
                             backdrop_path = config.images.base_url + config.images.backdrop_sizes[1] + (string)r["backdrop_path"],
@@ -303,6 +304,16 @@
             string resultString = await MakeRequestAsync(SearchPeopleMethodString, queryParams);
 
             return ParsePersonDetailsResponse(resultString);
+        }
+
+        public async Task<string> GetImdbId(int id)
+        {
+            var queryParams = GetBaseParams();
+            string resultString = await MakeRequestAsync(string.Format("movie/{0}", id), queryParams);
+
+            JObject result = JObject.Parse(resultString);
+
+            return (string)result["imdb_id"];
         }
 
         // URL: /discover/movie? with_people = 108916,7467&sort_by=popularity.desc

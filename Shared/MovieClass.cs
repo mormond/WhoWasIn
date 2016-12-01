@@ -1,5 +1,8 @@
-﻿namespace whoWasIn.Shared
+﻿using System;
+
+namespace whoWasIn.Shared
 {
+    [Serializable]
     public class MovieDetails
     {
         public string poster_path { get; set; }

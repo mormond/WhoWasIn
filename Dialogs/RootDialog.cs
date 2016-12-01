@@ -12,8 +12,9 @@ using whoWasIn.Services;
 using System.Linq;
 using whoWasIn.Services.LUISService;
 
-namespace whoWasIn.Dialogs {
-    
+namespace whoWasIn.Dialogs
+{
+
     //public class TheMovieDB {
     //    private static string apiKey = "c5bfd90362222164104c5317ee8a93cb";
 
@@ -26,7 +27,7 @@ namespace whoWasIn.Dialogs {
     //            return JsonConvert.DeserializeObject<dynamic>(responseString);
     //        }
     //    }
-                
+
     //    public static async Task<List<int>> lookupPeople(List<string> people) 
     //    {
     //        string baseUri = "https://api.themoviedb.org/3/search/person?language=en-US&include_adult=false";
@@ -56,9 +57,10 @@ namespace whoWasIn.Dialogs {
     //}
 
     [Serializable]
-    public class RootDialog : IDialog<object> {
+    public class RootDialog : IDialog<object>
+    {
 
-        public async Task StartAsync(IDialogContext ctx) 
+        public async Task StartAsync(IDialogContext ctx)
         {
             await ctx.PostAsync("You wanted to know about Bob and Al, right?");
             ctx.Wait(MessageReceivedAsync);
@@ -85,21 +87,30 @@ namespace whoWasIn.Dialogs {
 
             LUISResponse response = await LUISService.askLUIS(message.Text);
 
-            // DELETE THIS BLOCK DURING THE MERGE, MIKE !!!
+            switch (response.topScoringIntent.intent)
             {
-                ctx.Call(new TellMeAboutDialog(response), null);
+                case "Who worked on":
+                    ctx.Call<object>(new WhoWorkedOnDialog(response), null);
+                    break;
+                case "GetYear":
+                    ctx.Call<object>(new WhatYearDialog(), null);
+                    break;
+                case "Tell me about":
+                    ctx.Call<object>(new TellMeAbout(response), null);
+                    break;
+                default:
+                    break;
             }
 
-            /*await ctx.PostAsync("They both acted in");
+            //await ctx.PostAsync("They both acted in");
 
+            //MovieService movieService = await MovieService.GetInstanceAsync();
 
-            MovieService movieService = await MovieService.GetInstanceAsync();
-
-            var x = await movieService.SearchMultiAsync("Hitchcock");
+            //var x = await movieService.SearchMultiAsync("Hitchcock");
 
             //var x = await movieService.DiscoverMoviesWithPeopleAsync("Brad Pitt");
 
-            await ctx.PostAsync(string.Format("I found {0} matches.", x.Movies.Count()));
+            //await ctx.PostAsync(string.Format("I found {0} matches.", x.Movies.Count()));
 
             //foreach (var item in x)
             //{
@@ -117,8 +128,18 @@ namespace whoWasIn.Dialogs {
             //foreach (var movie in results.Children()) {
             //    await ctx.PostAsync(movie["title"].ToString());
             //}
-            */
-            // ctx.Wait(MessageReceivedAsync);
+
+            ctx.Wait(MessageReceivedAsync);
+        }
+
+        private async Task ResumeAfterWhoWorkedOnDialog(IDialogContext context, IAwaitable<int> result)
+        {
+         }
+        private async Task ResumeAfterWhatYearDialog(IDialogContext context, IAwaitable<int> result)
+        {
+        }
+        private async Task ResumeAfterTellMeAbout(IDialogContext context, IAwaitable<int> result)
+        {
         }
     }
 }

@@ -14,18 +14,18 @@ namespace whoWasIn.Dialogs {
         //Entities[] _entities;
 
         public TellMeAboutDialog(LUISResponse r) {
-            //_entities = r.entities;
+            _entities = r.entities;
         }
 
         public async Task StartAsync(IDialogContext ctx) {
-            //await ctx.PostAsync("I've got " + _entities.Count() + " things to tell you about");
+            await ctx.PostAsync("I've got " + _entities.Count() + " things to tell you about");
 
-            //if (_entities.Count() == 1) {
-                //await ctx.PostAsync("stuff");
-            //}
-            //else {
+            if (_entities.Count() == 1) {
+                await ctx.PostAsync("stuff");
+            }
+            else {
                 await ctx.PostAsync("Thinking time");
-            //}
+            }
 
             ctx.Wait(MessageReceivedAsync);
         }

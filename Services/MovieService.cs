@@ -1,4 +1,4 @@
-﻿namespace WhoWasIn.Services
+﻿namespace whoWasIn.Services
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -19,6 +19,7 @@
         const string GenresMethodString = "genre/movie/list";
         const string SearchMovieMethodString = "search/movie";
         const string SearchPeopleMethodString = "search/person";
+        const string SearchMultiMethodString = "search/multi";
         const string DiscoverMethodString = "discover/movie";
         const string ApiKeySettingName = "TMD_APIIKey";
 
@@ -113,7 +114,7 @@
             return query;
         }
 
-        private PersonDetails ParsePersonDetailsResponse(string jsonResultsString)
+        private IEnumerable<PersonDetails> ParsePersonDetailsResponse(string jsonResultsString)
         {
             JObject searchResult = JObject.Parse(jsonResultsString);
 
@@ -124,7 +125,25 @@
                             id = (int)r["id"]
                         };
 
-            return query.FirstOrDefault();
+            return query;
+        }
+
+        private IEnumerable<TvShowDetails> ParseTvShowDetailsResponse(string jsonResultsString)
+        {
+            JObject searchResult = JObject.Parse(jsonResultsString);
+
+            var query = from r in searchResult["results"]
+                        select new TvShowDetails()
+                        {
+                            overview = (string)r["overview"],
+                            backdrop_path = config.images.base_url + config.images.backdrop_sizes[1] + (string)r["backdrop_path"],
+                            poster_path = config.images.base_url + config.images.poster_sizes[1] + (string)r["poster_path"],
+                            vote_count = (int)r["vote_count"],
+                            vote_average = (float)r["vote_average"],
+                            name = (string)r["name"]
+                        };
+
+            return query;
         }
 
         public static async Task<MovieService> GetInstanceAsync()
@@ -144,6 +163,61 @@
             string resultString = await MakeRequestAsync(SearchMovieMethodString, queryParams);
 
             return ParseMoveDetailsResponse(resultString);
+        }
+
+        public async Task<MultiResults> SearchMultiAsync(string searchTerm)
+        {
+            var queryParams = GetBaseParams();
+            queryParams.Add("query", searchTerm);
+            string resultString = await MakeRequestAsync(SearchMultiMethodString, queryParams);
+
+            return ParseMultiResponse(resultString);
+        }
+
+        private MultiResults ParseMultiResponse(string jsonResultsString)
+        {
+            JObject searchResult = JObject.Parse(jsonResultsString);
+
+            var movieQuery = from r in searchResult["results"]
+                        where (string)r["media_type"] == "movie"
+                        select new MovieDetails()
+                        {
+                            overview = (string)r["overview"],
+                            overview_short = ((string)r["overview"]).Length > 100 ? ((string)r["overview"]).Substring(0, 100) + "..." : (string)r["overview"],
+                            release_date = (string)r["release_date"],
+                            backdrop_path = config.images.base_url + config.images.backdrop_sizes[1] + (string)r["backdrop_path"],
+                            poster_path = config.images.base_url + config.images.poster_sizes[1] + (string)r["poster_path"],
+                            vote_count = (int)r["vote_count"],
+                            vote_average = (float)r["vote_average"],
+                            title = (string)r["title"]
+                        };
+
+            var personQuery = from r in searchResult["results"]
+                             where (string)r["media_type"] == "person"
+                              select new PersonDetails()
+                              {
+                                  name = (string)r["name"],
+                                  id = (int)r["id"]
+                              };
+
+            var tvShowQuery = from r in searchResult["results"]
+                             where (string)r["media_type"] == "tv"
+                             select new TvShowDetails()
+                             {
+                                 overview = (string)r["overview"],
+                                 backdrop_path = config.images.base_url + config.images.backdrop_sizes[1] + (string)r["backdrop_path"],
+                                 poster_path = config.images.base_url + config.images.poster_sizes[1] + (string)r["poster_path"],
+                                 vote_count = (int)r["vote_count"],
+                                 vote_average = (float)r["vote_average"],
+                                 name = (string)r["name"]
+                             };
+
+            MultiResults results = new MultiResults();
+            results.Movies = movieQuery;
+            results.People = personQuery;
+            results.TvShows = tvShowQuery;
+
+            return results;
         }
 
         // URL: /discover/movie?primary_release_year=2010&sort_by=vote_average.desc
@@ -170,7 +244,7 @@
         }
 
         //URL: /search/person?query=brad%20pitt
-        public async Task<PersonDetails> FindPersonAsync(string name)
+        public async Task<IEnumerable<PersonDetails>> FindPeopleAsync(string name)
         {
             var queryParams = GetBaseParams();
             queryParams.Add("query", name);
@@ -180,24 +254,41 @@
         }
 
         // URL: /discover/movie? with_people = 108916,7467&sort_by=popularity.desc
-        public async Task<IEnumerable<MovieDetails>> DiscoverMoviesWithSharedPeopleAsync(string name1, string name2)
+        public async Task<IEnumerable<MovieDetails>> DiscoverMoviesWithPeopleAsync(params string[] people)
         {
-            var task1 = FindPersonAsync(name1);
-            var task2 = FindPersonAsync(name2);
+            List<Task<IEnumerable<PersonDetails>>> taskList = new List<Task<IEnumerable<PersonDetails>>>();
 
-            await Task.WhenAll(task1, task2);
-
-            if (task1.Result != null && task2.Result != null)
+            foreach (var item in people)
             {
-                var queryParams = GetBaseParams();
-                queryParams.Add("with_people", string.Format("{0},{1}", task1.Result.id, task2.Result.id));
-                queryParams.Add("sort_by", "popularity.desc");
-                string resultString = await MakeRequestAsync(DiscoverMethodString, queryParams);
-
-                return ParseMoveDetailsResponse(resultString);
+                taskList.Add(FindPeopleAsync(item));
             }
-            else
-                return new List<MovieDetails>();
+
+            await Task.WhenAll(taskList);
+
+            StringBuilder peopleList = new StringBuilder();
+
+            foreach (var item in taskList)
+            {
+                if (item.Result != null)
+                {
+                    peopleList.Append(string.Format("{0},", item.Result.FirstOrDefault().id));
+                }
+                else
+                {
+                    return new List<MovieDetails>();
+                }
+            }
+
+            var queryParams = GetBaseParams();
+            queryParams.Add("with_people", peopleList.ToString());
+            queryParams.Add("sort_by", "popularity.desc");
+            string resultString = await MakeRequestAsync(DiscoverMethodString, queryParams);
+
+            return ParseMoveDetailsResponse(resultString);
         }
+
+
+
     }
 }
+

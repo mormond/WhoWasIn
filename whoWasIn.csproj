@@ -121,6 +121,9 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="Dialogs\RootDialog.cs" />
+    <Compile Include="Dialogs\TellMeAbout.cs" />
+    <Compile Include="Dialogs\WhatYearDialog.cs" />
+    <Compile Include="Dialogs\WhoWorkedOnDialog.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

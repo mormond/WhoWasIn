@@ -11,7 +11,7 @@ namespace whoWasIn.Dialogs {
     [Serializable]
     public class TellMeAboutDialog : IDialog<object> {
     
-        //Entities[] _entities;
+        Entities[] _entities;
 
         public TellMeAboutDialog(LUISResponse r) {
             _entities = r.entities;

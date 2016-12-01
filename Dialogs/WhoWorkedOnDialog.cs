@@ -20,7 +20,6 @@ namespace whoWasIn.Dialogs {
         }
 
         public async Task StartAsync(IDialogContext ctx) {
-            await ctx.PostAsync("Who worked on dialog");
 
             MovieService movieService = await MovieService.GetInstanceAsync();
             List<string> peopleList = new List<string>();

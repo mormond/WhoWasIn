@@ -282,7 +282,7 @@
             peopleList.Remove(peopleList.Length-1, 1);            
 
             var queryParams = GetBaseParams();
-            queryParams.Add("with_people", peopleList.ToString());
+            queryParams.Add("with_cast", peopleList.ToString());
             queryParams.Add("sort_by", "popularity.desc");
             string resultString = await MakeRequestAsync(DiscoverMethodString, queryParams);
 

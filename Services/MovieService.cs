@@ -101,6 +101,7 @@
             var query = from r in searchResult["results"]
                         select new MovieDetails()
                         {
+                            id = (int)r["id"],
                             overview = (string)r["overview"],
                             overview_short = ((string)r["overview"]).Length > 100 ? ((string)r["overview"]).Substring(0, 100) + "..." : (string)r["overview"],
                             release_date = (string)r["release_date"],
@@ -114,6 +115,43 @@
             return query;
         }
 
+        private IEnumerable<CastCredit> ParseMovieCastCreditsResponse(string jsonResultsString)
+        {
+            JObject searchResult = JObject.Parse(jsonResultsString);
+
+            var query = from r in searchResult["cast"]
+                        select new CastCredit()
+                        {
+                            cast_id = (int)r["cast_id"],
+                            character = (string)r["character"],
+                            credit_id = (string)r["credit_id"],
+                            id = (int)r["id"],
+                            name = (string)r["name"],
+                            order = (int)r["order"],
+                            profile_path = (string)r["profile_path"]
+                        };
+
+            return query;
+        }
+ 
+        private IEnumerable<CrewCredit> ParseMovieCrewCreditsResponse(string jsonResultsString)
+        {
+            JObject searchResult = JObject.Parse(jsonResultsString);
+
+            var query = from r in searchResult["crew"]
+                        select new CrewCredit()
+                        {
+                            credit_id = (string)r["credit_id"],
+                            department = (string)r["department"],
+                            id = (int)r["id"],
+                            job = (string)r["job"],
+                            name = (string)r["name"],
+                            profile_path = (string)r["profile_path"]
+                        };
+
+            return query;
+        }
+         
         private IEnumerable<PersonDetails> ParsePersonDetailsResponse(string jsonResultsString)
         {
             JObject searchResult = JObject.Parse(jsonResultsString);
@@ -156,6 +194,20 @@
             return instance;
         }
 
+        public async Task<IEnumerable<CastCredit>> GetMovieCastCreditsAsync(int id) 
+        {
+            var queryParams = GetBaseParams();
+            string resultString  = await MakeRequestAsync($"movie/{id}/credits", queryParams);
+            return ParseMovieCastCreditsResponse(resultString);
+        }
+ 
+        public async Task<IEnumerable<CrewCredit>> GetMovieCrewCreditsAsync(int id) 
+        {
+            var queryParams = GetBaseParams();
+            string resultString  = await MakeRequestAsync($"movie/{id}/credits", queryParams);
+            return ParseMovieCrewCreditsResponse(resultString);
+        }
+        
         public async Task<IEnumerable<MovieDetails>> SearchMoviesAsync(string searchTerm)
         {
             var queryParams = GetBaseParams();

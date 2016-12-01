@@ -12,30 +12,60 @@ using whoWasIn.Shared;
 namespace whoWasIn.Dialogs {
     [Serializable]
     public class TellMeAboutDialog : IDialog<object> {
-    
-        Entities[] _entities;
 
+        string _entity = null;
+                
         public TellMeAboutDialog(LUISResponse r) {
-            _entities = r.entities;
+            if (r.entities.Count() > 0) {
+                _entity = r.entities.First().entity;
+            }
+        }
+
+        public TellMeAboutDialog(string movieName) {
+            _entity = movieName;
+        }
+
+        private async Task<MovieDetails> GetMovieDetails(string movieName) {
+            MovieService movies = await MovieService.GetInstanceAsync();
+            IEnumerable<MovieDetails> details = await movies.SearchMoviesAsync(movieName);
+            if (details.Count() > 0) {
+                return details.First();
+            }
+            return null;
+        }
+
+        private async Task<IEnumerable<CastCredit>> GetMovieCastCredits(int movieId) {
+            MovieService movies = await MovieService.GetInstanceAsync();
+            return await movies.GetMovieCastCreditsAsync(movieId);
+        }
+
+        private async Task<IEnumerable<CrewCredit>> GetMovieCrewCredits(int movieId) {
+            MovieService movies = await MovieService.GetInstanceAsync();
+            return await movies.GetMovieCrewCreditsAsync(movieId);
         }
 
         private async Task ShowDetails(IDialogContext ctx)
         {
-            if (_entities.Count() > 0) {
-                var entity = _entities[0];
-                MovieService movies = await MovieService.GetInstanceAsync();
-                IEnumerable<MovieDetails> details = await movies.SearchMoviesAsync(entity.entity);
-                if (details.Count() > 0) {
-                    var detail = details.First();
-                    var message = detail.title + " is a film released in " + detail.release_date;
-                    await ctx.PostAsync(message);
+            MovieDetails details = await GetMovieDetails(_entity);
+            if (details != null) {
+
+                IEnumerable<CastCredit> credits = await GetMovieCastCredits(details.id);
+                credits = credits.OrderBy(x => x.order).Take(3);
+
+                var starring = " starring ";
+                foreach (var c in credits) {
+                   starring += c.name;
+                   starring += ", "; 
                 }
-                else {
-                    await ctx.PostAsync("Can't deal with less than one match right now");
+
+                starring = starring.Remove(starring.Length - 2);
+                var idx = starring.LastIndexOf(",");
+                if (idx >= 0) {
+                    starring = starring.Substring(0, starring.Length - (starring.Length - idx)) + " and " + starring.Substring(idx + 2, starring.Length - idx - 2);
                 }
-            }
-            else {
-                await ctx.PostAsync("Can't deal with more than one entity right now");
+
+                var message = details.title + " is a film released in " + details.release_date + starring;
+                await ctx.PostAsync(message);
             }
         }
 
@@ -49,13 +79,28 @@ namespace whoWasIn.Dialogs {
             var message = await activity;
 
             if (message.Text == "who was in it") {
-               ctx.PostAsync("Some guy"); 
+                ctx.Wait(MessageReceivedAsync);
             }
             else if (message.Text == "who directed it") {
-               ctx.PostAsync("Some girl"); 
+                MovieDetails details = await GetMovieDetails(_entity);
+                if (details != null) {
+                    IEnumerable<CrewCredit> credits = await GetMovieCrewCredits(details.id);
+                    foreach (var c in credits) {
+                        if (c.job == "Director") {
+                            await ctx.PostAsync(c.name);
+                        }
+                    }
+                }
+                ctx.Wait(MessageReceivedAsync);
+            }
+            else {
+                ctx.Done((object)null);
             }
 
-            ctx.Wait(MessageReceivedAsync);
+        }
+
+        public async Task Resume(IDialogContext ctx, IAwaitable<string> result) {
+                ctx.Wait(MessageReceivedAsync);
         }
     }
 }

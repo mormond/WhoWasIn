@@ -28,13 +28,13 @@
             switch (response.topScoringIntent.intent)
             {
                 case "Who worked on":
-                    ctx.Call<object>(new WhoWorkedOnDialog(response), null);
+                    ctx.Call<object>(new WhoWorkedOnDialog(response), ResumeAfterWhoWorkedOnDialog);
                     break;
                 case "GetYear":
-                    ctx.Call<object>(new WhatYearDialog(response), null);
+                    ctx.Call<object>(new WhatYearDialog(response), ResumeAfterWhatYearDialog);
                     break;
                 case "Tell me about":
-                    ctx.Call<object>(new TellMeAboutDialog(response), null);
+                    ctx.Call<object>(new TellMeAboutDialog(response), ResumeAfterTellMeAboutDialog);
                     break;
                 default:
                     ctx.Wait(MessageReceivedAsync);
@@ -42,14 +42,19 @@
             }
         }
 
-        private async Task ResumeAfterWhoWorkedOnDialog(IDialogContext context, IAwaitable<int> result)
+        private async Task ResumeAfterWhoWorkedOnDialog(IDialogContext ctx, IAwaitable<object> result)
         {
+            ctx.Wait(MessageReceivedAsync);
         }
-        private async Task ResumeAfterWhatYearDialog(IDialogContext context, IAwaitable<int> result)
+
+        private async Task ResumeAfterWhatYearDialog(IDialogContext ctx, IAwaitable<object> result)
         {
+            ctx.Wait(MessageReceivedAsync);
         }
-        private async Task ResumeAfterTellMeAbout(IDialogContext context, IAwaitable<int> result)
+
+        private async Task ResumeAfterTellMeAboutDialog(IDialogContext ctx, IAwaitable<object> result)
         {
+            ctx.Wait(MessageReceivedAsync);
         }
     }
 }

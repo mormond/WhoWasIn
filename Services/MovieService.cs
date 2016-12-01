@@ -94,7 +94,7 @@
             }
         }
 
-        private IEnumerable<MovieDetails> ParseMoveDetailsResponse(string jsonResultsString)
+        private IEnumerable<MovieDetails> ParseMovieDetailsResponse(string jsonResultsString)
         {
             JObject searchResult = JObject.Parse(jsonResultsString);
 
@@ -162,7 +162,7 @@
             queryParams.Add("query", searchTerm);
             string resultString = await MakeRequestAsync(SearchMovieMethodString, queryParams);
 
-            return ParseMoveDetailsResponse(resultString);
+            return ParseMovieDetailsResponse(resultString);
         }
 
         public async Task<MultiResults> SearchMultiAsync(string searchTerm)
@@ -228,7 +228,7 @@
             queryParams.Add("sort_by", "popularity.desc");
             string resultString = await MakeRequestAsync(DiscoverMethodString, queryParams);
 
-            return ParseMoveDetailsResponse(resultString);
+            return ParseMovieDetailsResponse(resultString);
         }
 
         //URL: /discover/movie? with_genres = 18 & primary_release_year = 2014
@@ -240,7 +240,7 @@
             queryParams.Add("sort_by", "popularity.desc");
             string resultString = await MakeRequestAsync(DiscoverMethodString, queryParams);
 
-            return ParseMoveDetailsResponse(resultString);
+            return ParseMovieDetailsResponse(resultString);
         }
 
         //URL: /search/person?query=brad%20pitt
@@ -279,16 +279,15 @@
                 }
             }
 
+            peopleList.Remove(peopleList.Length-1, 1);            
+
             var queryParams = GetBaseParams();
             queryParams.Add("with_people", peopleList.ToString());
             queryParams.Add("sort_by", "popularity.desc");
             string resultString = await MakeRequestAsync(DiscoverMethodString, queryParams);
 
-            return ParseMoveDetailsResponse(resultString);
+            return ParseMovieDetailsResponse(resultString);
         }
-
-
-
     }
 }
 

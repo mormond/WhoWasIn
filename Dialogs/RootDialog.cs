@@ -12,8 +12,9 @@ using whoWasIn.Services;
 using System.Linq;
 using whoWasIn.Services.LUISService;
 
-namespace whoWasIn.Dialogs {
-    
+namespace whoWasIn.Dialogs
+{
+
     //public class TheMovieDB {
     //    private static string apiKey = "c5bfd90362222164104c5317ee8a93cb";
 
@@ -26,7 +27,7 @@ namespace whoWasIn.Dialogs {
     //            return JsonConvert.DeserializeObject<dynamic>(responseString);
     //        }
     //    }
-                
+
     //    public static async Task<List<int>> lookupPeople(List<string> people) 
     //    {
     //        string baseUri = "https://api.themoviedb.org/3/search/person?language=en-US&include_adult=false";
@@ -56,9 +57,10 @@ namespace whoWasIn.Dialogs {
     //}
 
     [Serializable]
-    public class RootDialog : IDialog<object> {
+    public class RootDialog : IDialog<object>
+    {
 
-        public async Task StartAsync(IDialogContext ctx) 
+        public async Task StartAsync(IDialogContext ctx)
         {
             await ctx.PostAsync("You wanted to know about Bob and Al, right?");
             ctx.Wait(MessageReceivedAsync);
@@ -84,6 +86,23 @@ namespace whoWasIn.Dialogs {
             }*/
 
             LUISResponse response = await LUISService.askLUIS(message.Text);
+
+            switch (response.topScoringIntent.intent)
+            {
+
+
+                case "Who worked on":
+                    ctx.Call<object>(new RootDialog(), null);
+                    break;
+                case "GetYear":
+                    ctx.Call<object>(new RootDialog(), null);
+                    break;
+                case "Tell me about":
+                    ctx.Call<object>(new RootDialog(), null);
+                    break;
+                default:
+                    break;
+            }
 
             await ctx.PostAsync("They both acted in");
 

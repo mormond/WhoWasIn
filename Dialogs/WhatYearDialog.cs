@@ -7,18 +7,28 @@ using System.Threading.Tasks;
 using System.Web;
 using whoWasIn.Services.LUISService;
 
-namespace whoWasIn.Dialogs {
-    public class WhatYearDialog : IDialog<object> {
+namespace whoWasIn.Dialogs
+{
+    [Serializable]
+    public class WhatYearDialog : IDialog<object>
+    {
+        LUISResponse response;
 
-        public WhatYearDialog(LUISResponse r) {
+        public WhatYearDialog(LUISResponse r)
+        {
+            response = r;
         }
 
-        public async Task StartAsync(IDialogContext ctx) {
+        public async Task StartAsync(IDialogContext ctx)
+        {
             await ctx.PostAsync("What year dialog");
             ctx.Wait(MessageReceivedAsync);
+
+            ctx.Done<object>(null);
         }
 
-        public async Task MessageReceivedAsync(IDialogContext ctx, IAwaitable<IMessageActivity> argument) {
+        public async Task MessageReceivedAsync(IDialogContext ctx, IAwaitable<IMessageActivity> argument)
+        {
             ctx.Wait(MessageReceivedAsync);
         }
     }

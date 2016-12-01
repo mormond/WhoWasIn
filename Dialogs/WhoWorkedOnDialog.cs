@@ -8,6 +8,8 @@ using System.Web;
 using whoWasIn.Services.LUISService;
 
 namespace whoWasIn.Dialogs {
+
+    [Serializable]
     public class WhoWorkedOnDialog : IDialog<object> {
 
         public WhoWorkedOnDialog(LUISResponse r) {

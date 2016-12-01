@@ -85,7 +85,12 @@ namespace whoWasIn.Dialogs {
 
             LUISResponse response = await LUISService.askLUIS(message.Text);
 
-            await ctx.PostAsync("They both acted in");
+            // DELETE THIS BLOCK DURING THE MERGE, MIKE !!!
+            {
+                ctx.Call(new TellMeAboutDialog(response), null);
+            }
+
+            /*await ctx.PostAsync("They both acted in");
 
 
             MovieService movieService = await MovieService.GetInstanceAsync();
@@ -112,8 +117,8 @@ namespace whoWasIn.Dialogs {
             //foreach (var movie in results.Children()) {
             //    await ctx.PostAsync(movie["title"].ToString());
             //}
-
-            ctx.Wait(MessageReceivedAsync);
+            */
+            // ctx.Wait(MessageReceivedAsync);
         }
     }
 }

@@ -8,13 +8,25 @@ using System.Web;
 using whoWasIn.Services.LUISService;
 
 namespace whoWasIn.Dialogs {
-    public class TellMeAbout : IDialog<object> {
+    [Serializable]
+    public class TellMeAboutDialog : IDialog<object> {
+    
+        //Entities[] _entities;
 
-        public TellMeAbout(LUISResponse r) {
+        public TellMeAboutDialog(LUISResponse r) {
+            //_entities = r.entities;
         }
 
         public async Task StartAsync(IDialogContext ctx) {
-            await ctx.PostAsync("What year dialog");
+            //await ctx.PostAsync("I've got " + _entities.Count() + " things to tell you about");
+
+            //if (_entities.Count() == 1) {
+                //await ctx.PostAsync("stuff");
+            //}
+            //else {
+                await ctx.PostAsync("Thinking time");
+            //}
+
             ctx.Wait(MessageReceivedAsync);
         }
 

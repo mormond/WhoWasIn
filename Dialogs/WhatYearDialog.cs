@@ -9,8 +9,8 @@ using whoWasIn.Services;
 using whoWasIn.Services.LUISService;
 using whoWasIn.Shared;
 
-namespace whoWasIn.Dialogs
-{
+namespace whoWasIn.Dialogs {
+
     [Serializable]
     public class WhatYearDialog : IDialog<object>
     {

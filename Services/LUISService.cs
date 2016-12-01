@@ -8,6 +8,7 @@ using System.Web;
 
 namespace whoWasIn.Services.LUISService 
 {
+    [Serializable]
     public class LUISResponse 
     { 
         public string query { get; set; } 
@@ -16,6 +17,7 @@ namespace whoWasIn.Services.LUISService
         public Dialog dialog { get; set; } 
     }
 
+    [Serializable]
     public class TopScoringIntent 
     { 
         public string intent { get; set; } 
@@ -23,6 +25,7 @@ namespace whoWasIn.Services.LUISService
         public Actions[] actions { get; set; } 
     }
      
+    [Serializable]
     public class Actions 
     { 
         public string triggered { get; set; } 
@@ -30,6 +33,7 @@ namespace whoWasIn.Services.LUISService
         public Parameters[] parameters { get; set; } 
     }
      
+    [Serializable]
     public class Parameters 
     { 
         public string name { get; set; } 
@@ -37,12 +41,14 @@ namespace whoWasIn.Services.LUISService
         public Value[] value { get; set; } 
     }
      
+    [Serializable]
     public class Value 
     { 
         public string entity { get; set; } 
         public string type { get; set; } 
     } 
  
+    [Serializable]
     public class Entities 
     { 
         public string entity { get; set; } 
@@ -53,11 +59,13 @@ namespace whoWasIn.Services.LUISService
         public Resolution resolution { get; set; } 
     }
      
+    [Serializable]
     public class Resolution 
     { 
         public string date { get; set; } 
     }
      
+    [Serializable]
     public class Dialog 
     { 
         public string prompt { get; set; } 

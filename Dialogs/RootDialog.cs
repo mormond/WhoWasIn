@@ -13,7 +13,7 @@
 
         public async Task StartAsync(IDialogContext ctx)
         {
-            await ctx.PostAsync("You wanted to know about Bob and Al, right?");
+            await ctx.PostAsync("Greetings...");
             ctx.Wait(MessageReceivedAsync);
         }
 
@@ -21,7 +21,7 @@
         {
             var message = await argument;
 
-            await ctx.PostAsync("You said " + message.Text + " but you meant to ask something else");
+            await ctx.PostAsync("You said " + message.Text);
 
             LUISResponse response = await LUISService.askLUIS(message.Text);
 
@@ -34,7 +34,7 @@
                     ctx.Call<object>(new WhatYearDialog(response), null);
                     break;
                 case "Tell me about":
-                    ctx.Call<object>(new TellMeAbout(response), null);
+                    ctx.Call<object>(new TellMeAboutDialog(response), null);
                     break;
                 default:
                     ctx.Wait(MessageReceivedAsync);

@@ -1,4 +1,4 @@
-﻿namespace WhoWasIn.Shared
+﻿namespace whoWasIn.Shared
 {
     public class MovieDetails
     {

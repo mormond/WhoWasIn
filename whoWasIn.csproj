@@ -130,7 +130,9 @@
     <Compile Include="Shared\ConfigClass.cs" />
     <Compile Include="Shared\GenreClass.cs" />
     <Compile Include="Shared\MovieClass.cs" />
+    <Compile Include="Shared\MultiClass.cs" />
     <Compile Include="Shared\PersonClass.cs" />
+    <Compile Include="Shared\TvShowClass.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

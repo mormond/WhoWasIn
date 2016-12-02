@@ -3,6 +3,7 @@ using Microsoft.Bot.Connector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using whoWasIn.Services;
@@ -11,7 +12,7 @@ using whoWasIn.Shared;
 
 namespace whoWasIn.Dialogs {
     [Serializable]
-    public class TellMeAboutDialog : IDialog<object> {
+    public class TellMeAboutDialog : IDialog<string> {
 
         string _entity = null;
                 
@@ -78,6 +79,7 @@ namespace whoWasIn.Dialogs {
 
             var message = await activity;
 
+
             if (message.Text == "who was in it") {
                 ctx.Wait(MessageReceivedAsync);
             }
@@ -89,14 +91,38 @@ namespace whoWasIn.Dialogs {
                         if (c.job == "Director") {
                             await ctx.PostAsync(c.name);
                         }
+                        System.Diagnostics.Debug.WriteLine(c.job);
                     }
                 }
                 ctx.Wait(MessageReceivedAsync);
             }
             else {
-                ctx.Done((object)null);
-            }
+                Regex regex = new Regex(@"^who did the (?<job>.+)|^who wrote the (?<job>.+)|^who did (?<job>.+)|^who was the (?<job>.+)|");
+                var match = regex.Match(message.Text);
+                if (match.Groups["job"] != null && match.Groups["job"].Value.Length > 0) {
+                    var job = match.Groups["job"];
 
+                    bool matched = false;
+                    MovieDetails details = await GetMovieDetails(_entity);
+                    if (details != null) {
+                        IEnumerable<CrewCredit> credits = await GetMovieCrewCredits(details.id);
+                        foreach (var c in credits) {
+                            if (String.Equals(c.job, job.Value, StringComparison.OrdinalIgnoreCase)) {
+                                matched = true;
+                                await ctx.PostAsync(c.name);
+                            }
+                            System.Diagnostics.Debug.WriteLine(c.job);
+                        }
+                    }
+                    if (!matched) {
+                        await ctx.PostAsync("Sorry.. couldn't find anyone who did that on this title");
+                    }
+                    ctx.Wait(MessageReceivedAsync);
+                }
+                else {
+                    ctx.Done(message.Text);
+                }
+            }
         }
 
         public async Task Resume(IDialogContext ctx, IAwaitable<string> result) {

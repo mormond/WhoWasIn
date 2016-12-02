@@ -13,7 +13,7 @@
 
         public async Task StartAsync(IDialogContext ctx)
         {
-            await ctx.PostAsync("Greetings...");
+            //await ctx.PostAsync("Greetings...");
             ctx.Wait(MessageReceivedAsync);
         }
 
@@ -43,7 +43,7 @@
         {
             var message = await argument;
 
-            await ctx.PostAsync("You said " + message.Text);
+            //await ctx.PostAsync("You said " + message.Text);
             await askLuis(ctx, message.Text);
         }
 

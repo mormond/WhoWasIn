@@ -51,12 +51,12 @@ namespace whoWasIn.Dialogs {
 
                     //this.movieList = movies;
                     string filmText = movies.Count() > 1 ? "any of those movies" : "that film";
-                    await ctx.PostAsync($"They have been in {movies.Count()} films together. Here is a list of them:\n\n{builder.ToString()}\n\nWould you like to know more about {filmText}?");
+                    await ctx.PostAsync($"I have found {movies.Count()} films. Here is a list of them:\n\n{builder.ToString()}\n\nWould you like to know more about {filmText}?");
                     this.state = WhoWorkedState.UserPrompted;
                 }
                 else
                 {
-                    await ctx.PostAsync("As far as I know, they haven't been in any films together");
+                    await ctx.PostAsync("There aren't any that I know.");
                     this.state = WhoWorkedState.MessageProcessed;
                     ctx.Done("No results found");
                 }
@@ -89,6 +89,7 @@ namespace whoWasIn.Dialogs {
                     {
                         peopleListBuilder.Append(" and ");
                     }
+                    i++;
                 }
             }
             peopleListBuilder.Append(" in.");

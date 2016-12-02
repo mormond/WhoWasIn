@@ -146,7 +146,7 @@ namespace whoWasIn.Dialogs {
 
                         case Trinary.No:
                             await ctx.PostAsync("OK, maybe another time.");
-                            ctx.Done("Complete");
+                            ctx.Done("");
                             break;
 
                         default:
@@ -183,7 +183,10 @@ namespace whoWasIn.Dialogs {
             string pattern = "^(yes|yup|y|yeah)";
             Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
             response = regex.IsMatch(reply);
-            result = Trinary.Yes;
+            if (response)
+            {
+                result = Trinary.Yes;
+            }
 
             if (!response)
             {

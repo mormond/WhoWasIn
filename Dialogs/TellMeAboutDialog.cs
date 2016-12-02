@@ -30,7 +30,11 @@ namespace whoWasIn.Dialogs {
             MovieService movies = await MovieService.GetInstanceAsync();
             IEnumerable<MovieDetails> details = await movies.SearchMoviesAsync(movieName);
             if (details.Count() > 0) {
-                return details.First();
+                var result = from x in details
+                where x.title.ToLower() == movieName.ToLower()
+                select x;
+
+                return result.First();
             }
             return null;
         }
@@ -65,7 +69,7 @@ namespace whoWasIn.Dialogs {
                     starring = starring.Substring(0, starring.Length - (starring.Length - idx)) + " and " + starring.Substring(idx + 2, starring.Length - idx - 2);
                 }
 
-                var message = details.title + " is a film released in " + details.release_date + starring;
+                var message = details.title + " is a film released in " + details.release_date.Substring(0, 4) + starring;
                 await ctx.PostAsync(message);
             }
         }

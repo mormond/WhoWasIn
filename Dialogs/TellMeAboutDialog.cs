@@ -71,6 +71,7 @@ namespace whoWasIn.Dialogs {
 
                 var message = details.title + " is a film released in " + details.release_date.Substring(0, 4) + starring;
                 await ctx.PostAsync(message);
+                await createCard(ctx, details);
             }
         }
 
@@ -78,11 +79,35 @@ namespace whoWasIn.Dialogs {
             await ShowDetails(ctx);
             ctx.Wait(MessageReceivedAsync);
         }
+        
+        private async Task createCard(IDialogContext ctx, MovieDetails details)
+        {
+            List<Attachment> attachmentList = new List<Attachment>();
+
+            CardImage image = new CardImage(details.poster_path);
+            List<CardImage> images = new List<CardImage>() { image };
+
+            ThumbnailCard h = new ThumbnailCard()
+            {
+                Title = details.title,
+                Subtitle = string.IsNullOrEmpty(details.release_date) ? "" : details.release_date.Substring(0, 4),
+                //Tap = new CardAction(ActionTypes.OpenUrl, "Visit in IMDB", value: string.Format("http://www.imdb.com/title/{0}", x)),
+                Text = details.overview_short,
+                Images = images,
+                //Buttons = new List<CardAction>() { new CardAction(ActionTypes.OpenUrl, "Learn more", value: string.Format("http://www.imdb.com/title/{0}", x)) }
+            };
+
+            attachmentList.Add(h.ToAttachment());
+
+            var reply = ctx.MakeMessage();
+            reply.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+            reply.Attachments = attachmentList;
+            await ctx.PostAsync(reply);
+        }
 
         public async Task MessageReceivedAsync(IDialogContext ctx, IAwaitable<IMessageActivity> activity) {
 
             var message = await activity;
-
 
             if (message.Text == "who was in it") {
                 ctx.Wait(MessageReceivedAsync);

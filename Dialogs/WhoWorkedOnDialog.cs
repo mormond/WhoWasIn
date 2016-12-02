@@ -2,6 +2,7 @@
 using Microsoft.Bot.Connector;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -33,34 +34,76 @@ namespace whoWasIn.Dialogs {
 
         public async Task StartAsync(IDialogContext ctx)
         {
-            IEnumerable<Shared.MovieDetails> movies = await GetMovies();
-
-            if (movies.Count() > 0)
+            List<string> peopleList = GetPeopleList();
+            if (peopleList.Count > 0)
             {
-                StringBuilder builder = new StringBuilder();
-                foreach (var movie in movies)
+                await ctx.PostAsync(GetPeopleListMessage(peopleList));
+
+                IEnumerable<Shared.MovieDetails> movies = await GetMovies(peopleList);
+
+                if (movies.Count() > 0)
                 {
-                    builder.Append($"{movie.title}\n\n");
+                    StringBuilder builder = new StringBuilder();
+                    foreach (var movie in movies)
+                    {
+                        builder.Append($"{movie.title}\n\n");
+                    }
+
+                    //this.movieList = movies;
+                    string filmText = movies.Count() > 1 ? "any of those movies" : "that film";
+                    await ctx.PostAsync($"They have been in {movies.Count()} films together. Here is a list of them:\n\n{builder.ToString()}\n\nWould you like to know more about {filmText}?");
+                    this.state = WhoWorkedState.UserPrompted;
+                }
+                else
+                {
+                    await ctx.PostAsync("As far as I know, they haven't been in any films together");
+                    this.state = WhoWorkedState.MessageProcessed;
+                    ctx.Done("No results found");
                 }
 
-                //this.movieList = movies;
-                string filmText = movies.Count() > 1 ? "any of those movies" : "that film";
-                await ctx.PostAsync($"They have been in {movies.Count()} films together. Here is a list of them:\n\n{builder.ToString()}\n\nWould you like to know more about {filmText}?");
-                this.state = WhoWorkedState.UserPrompted;
+                ctx.Wait(MessageReceivedAsync);
             }
             else
             {
-                await ctx.PostAsync("As far as I know, they haven't been in any films together");
-                this.state = WhoWorkedState.MessageProcessed;
-                ctx.Done("No results found");
+                await ctx.PostAsync("I didn't recognise the names of any actors, could you try some others?");
+                ctx.Done("Done");
             }
-
-            ctx.Wait(MessageReceivedAsync);
         }
 
-        private async Task<IEnumerable<Shared.MovieDetails>> GetMovies()
+        private string GetPeopleListMessage(List<string> peopleList)
+        {
+            StringBuilder peopleListBuilder = new StringBuilder();
+            peopleListBuilder.Append("I'm looking up films that have ");
+            TextInfo textInfo = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo;
+            int i = 1;
+            foreach (string person in peopleList)
+            {
+                peopleListBuilder.Append($"{textInfo.ToTitleCase(person)}");
+                if (i < peopleList.Count)
+                {
+                    if (peopleList.Count - i > 1)
+                    {
+                        peopleListBuilder.Append(", ");
+                    }
+                    else
+                    {
+                        peopleListBuilder.Append(" and ");
+                    }
+                }
+            }
+            peopleListBuilder.Append(" in.");
+            return peopleListBuilder.ToString();
+        }
+
+        private async Task<IEnumerable<Shared.MovieDetails>> GetMovies(List<string> peopleList)
         {
             MovieService movieService = await MovieService.GetInstanceAsync();
+            var movies = await movieService.DiscoverMoviesWithPeopleAsync(peopleList.ToArray());
+            return movies;
+        }
+
+        private List<string> GetPeopleList()
+        {
             List<string> peopleList = new List<string>();
             foreach (Entities detected in this.response.entities)
             {
@@ -70,8 +113,7 @@ namespace whoWasIn.Dialogs {
                 }
             }
 
-            var movies = await movieService.DiscoverMoviesWithPeopleAsync(peopleList.ToArray());
-            return movies;
+            return peopleList;
         }
 
         public async Task MessageReceivedAsync(IDialogContext ctx, IAwaitable<IMessageActivity> argument) {
@@ -84,7 +126,7 @@ namespace whoWasIn.Dialogs {
                     this.state = WhoWorkedState.UserRepliedToPrompt;
                     if (carryOn) {
                         List<string> movieOptions = new List<string>();
-                        IEnumerable<Shared.MovieDetails> movies = await GetMovies();
+                        IEnumerable<Shared.MovieDetails> movies = await GetMovies(GetPeopleList());
                         foreach (var movie in movies)
                         {
                             movieOptions.Add(movie.title);
@@ -93,12 +135,9 @@ namespace whoWasIn.Dialogs {
                         PromptDialog.Choice<string>(ctx, Resume, promptOptions);
                     }
                     else {
-                        ctx.Done("No results found");
+                        await ctx.PostAsync("OK, maybe another time.");
+                        ctx.Done("Complete");
                     }
-                    break;
-
-                case WhoWorkedState.UserRepliedToPrompt:
-                    await ctx.PostAsync("Ok, I'm not ready to do that yet.");
                     break;
 
                 default:

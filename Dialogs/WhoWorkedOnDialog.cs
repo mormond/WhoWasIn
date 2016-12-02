@@ -89,6 +89,7 @@ namespace whoWasIn.Dialogs {
                     {
                         peopleListBuilder.Append(" and ");
                     }
+                    i++;
                 }
             }
             peopleListBuilder.Append(" in.");

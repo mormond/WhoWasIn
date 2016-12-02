@@ -57,11 +57,7 @@ namespace whoWasIn
                     if (conversationupdate.MembersAdded.Any())
                     {
                         var reply = message.CreateReply();
-                        reply.Text = "Welcome to the Movies Bot";
-                        await client.Conversations.ReplyToActivityAsync(reply);
-
-                        reply = message.CreateReply();
-                        reply.Text = "I can answer questions such as 'In what year was Gremlins released?' or 'What films have Brad Pitt and Angelina Jolie been in together?'";
+                        reply.Text = "Welcome to the Movies Bot\n\nI can answer questions such as 'In what year was Gremlins released?' or 'What films have Brad Pitt and Angelina Jolie been in together?'";
                         await client.Conversations.ReplyToActivityAsync(reply);
                     }
                 }

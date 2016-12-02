@@ -33,7 +33,10 @@
                     ctx.Call<string>(new TellMeAboutDialog(response), ResumeAfterTellMeAboutDialog);
                     break;
                 default:
-                    await ctx.PostAsync("Sorry, didn't quite get that. Try something like \"What films has Cary Grant been in?\"");
+                    string failResponse = "Sorry, I didn't understand " + message + ".\n\n" +
+                        "Try 'Tell me about [movie]', 'In what year was [movie] released?' " +
+                        "or 'Have [actor] and [actor] been in any movies together?'";
+                    await ctx.PostAsync(failResponse);
                     ctx.Wait(MessageReceivedAsync);
                     break;
             }

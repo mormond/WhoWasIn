@@ -17,13 +17,9 @@
             ctx.Wait(MessageReceivedAsync);
         }
 
-        public async Task MessageReceivedAsync(IDialogContext ctx, IAwaitable<IMessageActivity> argument)
+        private async Task askLuis(IDialogContext ctx, string message)
         {
-            var message = await argument;
-
-            //await ctx.PostAsync("You said " + message.Text);
-
-            LUISResponse response = await LUISService.askLUIS(message.Text);
+            LUISResponse response = await LUISService.askLUIS(message);
 
             switch (response.topScoringIntent.intent)
             {
@@ -34,7 +30,7 @@
                     ctx.Call<object>(new WhatYearDialog(response), ResumeAfterWhatYearDialog);
                     break;
                 case "Tell me about":
-                    ctx.Call<object>(new TellMeAboutDialog(response), ResumeAfterTellMeAboutDialog);
+                    ctx.Call<string>(new TellMeAboutDialog(response), ResumeAfterTellMeAboutDialog);
                     break;
                 default:
                     ctx.Wait(MessageReceivedAsync);
@@ -42,19 +38,35 @@
             }
         }
 
+        public async Task MessageReceivedAsync(IDialogContext ctx, IAwaitable<IMessageActivity> argument)
+        {
+            var message = await argument;
+
+            await ctx.PostAsync("You said " + message.Text);
+            await askLuis(ctx, message.Text);
+        }
+
         private async Task ResumeAfterWhoWorkedOnDialog(IDialogContext ctx, IAwaitable<object> result)
         {
+            var utterance = await result;
             ctx.Wait(MessageReceivedAsync);
         }
 
         private async Task ResumeAfterWhatYearDialog(IDialogContext ctx, IAwaitable<object> result)
         {
+            var utterance = await result;
             ctx.Wait(MessageReceivedAsync);
         }
 
-        private async Task ResumeAfterTellMeAboutDialog(IDialogContext ctx, IAwaitable<object> result)
+        private async Task ResumeAfterTellMeAboutDialog(IDialogContext ctx, IAwaitable<string> result)
         {
-            ctx.Wait(MessageReceivedAsync);
+            var utterance = await result;
+            if (utterance != "") {
+                await askLuis(ctx, utterance);
+            }
+            else {
+                ctx.Wait(MessageReceivedAsync);
+            }
         }
     }
 }

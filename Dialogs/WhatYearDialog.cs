@@ -42,7 +42,14 @@ namespace whoWasIn.Dialogs {
                 }
             }
 
-            await ctx.PostAsync(string.Format("I found {0} results containing the term '{1}'. I'm guessing you probably meant this one...", movieList.Count(), entityName));
+            if (movieList.Count() > 1)
+            {
+                await ctx.PostAsync(string.Format("I found {0} results containing the term '{1}'. I'm guessing you probably meant this one...", movieList.Count(), entityName));
+            }
+            else
+            {
+                await ctx.PostAsync("I found the following movie.");
+            }
 
             List<Attachment> attachmentList = new List<Attachment>();
 

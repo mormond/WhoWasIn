@@ -30,7 +30,11 @@ namespace whoWasIn.Dialogs {
             MovieService movies = await MovieService.GetInstanceAsync();
             IEnumerable<MovieDetails> details = await movies.SearchMoviesAsync(movieName);
             if (details.Count() > 0) {
-                return details.First();
+                var result = from x in details
+                where x.title.ToLower() == movieName.ToLower()
+                select x;
+
+                return result.First();
             }
             return null;
         }

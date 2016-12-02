@@ -93,12 +93,9 @@ namespace whoWasIn.Dialogs {
                         PromptDialog.Choice<string>(ctx, Resume, promptOptions);
                     }
                     else {
-                        ctx.Done("No results found");
+                        await ctx.PostAsync("OK, maybe another time.");
+                        ctx.Done("Complete");
                     }
-                    break;
-
-                case WhoWorkedState.UserRepliedToPrompt:
-                    await ctx.PostAsync("Ok, I'm not ready to do that yet.");
                     break;
 
                 default:

@@ -71,9 +71,9 @@ namespace whoWasIn.Dialogs {
             reply.Attachments = attachmentList;
             await ctx.PostAsync(reply);
 
-            ctx.Wait(MessageReceivedAsync);
+            //ctx.Wait(MessageReceivedAsync);
 
-            //ctx.Done<object>(null);
+            ctx.Done<object>(null);
         }
 
         async private Task<IEnumerable<MovieDetails>> LookupMovieAsync(string searchString)

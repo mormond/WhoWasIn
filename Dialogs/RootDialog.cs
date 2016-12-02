@@ -33,6 +33,7 @@
                     ctx.Call<string>(new TellMeAboutDialog(response), ResumeAfterTellMeAboutDialog);
                     break;
                 default:
+                    await ctx.PostAsync("Sorry, didn't quite get that. Try something like \"What films has Cary Grant been in?\"");
                     ctx.Wait(MessageReceivedAsync);
                     break;
             }

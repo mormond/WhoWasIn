@@ -21,8 +21,15 @@ namespace whoWasIn.Dialogs {
         UserRepliedToPrompt
     }
 
+    public enum Trinary
+    {
+        Yes,
+        No,
+        Unsure
+    }
+
     [Serializable]
-    public class WhoWorkedOnDialog : IDialog<object> {
+    public class WhoWorkedOnDialog : IDialog<string> {
         private LUISResponse response;
         //private IEnumerable<Shared.MovieDetails> movieList;
         private WhoWorkedState state;
@@ -123,21 +130,28 @@ namespace whoWasIn.Dialogs {
 
             switch (this.state) {
                 case WhoWorkedState.UserPrompted:
-                    bool carryOn = ParseReplyToPrompt(message.Text);
+                    Trinary carryOn = ParseReplyToPrompt(message.Text);
                     this.state = WhoWorkedState.UserRepliedToPrompt;
-                    if (carryOn) {
-                        List<string> movieOptions = new List<string>();
-                        IEnumerable<Shared.MovieDetails> movies = await GetMovies(GetPeopleList());
-                        foreach (var movie in movies)
-                        {
-                            movieOptions.Add(movie.title);
-                        }
-                        PromptOptions<string> promptOptions = new PromptOptions<string>(prompt: "Which one?", options: movieOptions);
-                        PromptDialog.Choice<string>(ctx, Resume, promptOptions);
-                    }
-                    else {
-                        await ctx.PostAsync("OK, maybe another time.");
-                        ctx.Done("Complete");
+                    switch (carryOn) {
+                        case Trinary.Yes:
+                            List<string> movieOptions = new List<string>();
+                            IEnumerable<Shared.MovieDetails> movies = await GetMovies(GetPeopleList());
+                            foreach (var movie in movies)
+                            {
+                                movieOptions.Add(movie.title);
+                            }
+                            PromptOptions<string> promptOptions = new PromptOptions<string>(prompt: "Which one?", options: movieOptions);
+                            PromptDialog.Choice<string>(ctx, Resume, promptOptions);
+                            break;
+
+                        case Trinary.No:
+                            await ctx.PostAsync("OK, maybe another time.");
+                            ctx.Done("Complete");
+                            break;
+
+                        default:
+                            ctx.Done(message.Text);
+                            break;
                     }
                     break;
 
@@ -161,13 +175,25 @@ namespace whoWasIn.Dialogs {
             context.Done(result);
         }
 
-        private bool ParseReplyToPrompt(string reply) {
+        private Trinary ParseReplyToPrompt(string reply) {
 
-            bool result = false;
+            Trinary result = Trinary.No;
+            bool response = false;
 
             string pattern = "^(yes|yup|y|yeah)";
             Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
-            result = regex.IsMatch(reply);
+            response = regex.IsMatch(reply);
+            result = Trinary.Yes;
+
+            if (!response)
+            {
+                pattern = "^(no|nope|n|nah)";
+                regex = new Regex(pattern, RegexOptions.IgnoreCase);
+                if (!regex.IsMatch(reply))
+                {
+                    result = Trinary.Unsure;
+                }
+            }
 
             return result;
         }

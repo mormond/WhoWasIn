@@ -24,7 +24,7 @@
             switch (response.topScoringIntent.intent)
             {
                 case "Who worked on":
-                    ctx.Call<object>(new WhoWorkedOnDialog(response), ResumeAfterWhoWorkedOnDialog);
+                    ctx.Call<string>(new WhoWorkedOnDialog(response), ResumeAfterTellMeAboutDialog);
                     break;
                 case "GetYear":
                     ctx.Call<object>(new WhatYearDialog(response), ResumeAfterWhatYearDialog);
@@ -50,11 +50,6 @@
             await askLuis(ctx, message.Text);
         }
 
-        private async Task ResumeAfterWhoWorkedOnDialog(IDialogContext ctx, IAwaitable<object> result)
-        {
-            var utterance = await result;
-            ctx.Wait(MessageReceivedAsync);
-        }
 
         private async Task ResumeAfterWhatYearDialog(IDialogContext ctx, IAwaitable<object> result)
         {

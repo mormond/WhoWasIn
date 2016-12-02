@@ -103,7 +103,6 @@
                         {
                             id = (int)r["id"],
                             overview = (string)r["overview"],
-                            id = (int)r["id"],
                             overview_short = ((string)r["overview"]).Length > 100 ? ((string)r["overview"]).Substring(0, 100) + "..." : (string)r["overview"],
                             release_date = (string)r["release_date"],
                             backdrop_path = config.images.base_url + config.images.backdrop_sizes[1] + (string)r["backdrop_path"],

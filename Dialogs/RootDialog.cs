@@ -21,7 +21,7 @@
         {
             var message = await argument;
 
-            await ctx.PostAsync("You said " + message.Text);
+            //await ctx.PostAsync("You said " + message.Text);
 
             LUISResponse response = await LUISService.askLUIS(message.Text);
 

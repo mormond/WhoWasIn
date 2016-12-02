@@ -113,6 +113,12 @@ namespace whoWasIn.Dialogs {
         {
             string movieTitle = await result;
             await context.PostAsync($"You picked {movieTitle}");
+            context.Call(new TellMeAboutDialog(movieTitle), ResumeAfterTellMe);
+        }
+
+        private async Task ResumeAfterTellMe(IDialogContext context, IAwaitable<object> result) {
+            await result;
+            context.Done(result);
         }
 
         private bool ParseReplyToPrompt(string reply) {
